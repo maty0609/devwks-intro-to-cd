@@ -34,7 +34,7 @@ metadata:
   labels:
     app: chuck-norris-app
     version: v1
-  name: chuck-norris-app
+  name: chuck-norris-app-v1
 spec:
   replicas: 1
   selector:
@@ -52,8 +52,8 @@ spec:
         version: v1
     spec:
       containers:
-      - image: maty0609/clus2022-chuck-app:latest
-        name: chuck-norris-app
+      - image: maty0609/clus2022-chuck-app:v1
+        name: chuck-norris-app-v1
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -71,7 +71,7 @@ metadata:
   labels:
     app: chuck-norris-app
     version: v2
-  name: chuck-norris-app-fix
+  name: chuck-norris-app-v2
 spec:
   replicas: 1
   selector:
@@ -89,8 +89,8 @@ spec:
         version: v2
     spec:
       containers:
-      - image: maty0609/clus2022-chuck-app:fix
-        name: chuck-norris-app-fix
+      - image: maty0609/clus2022-chuck-app:v2
+        name: chuck-norris-app-v2
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -132,28 +132,27 @@ You can check the progress with the command:
 You should see something like this:
 
 ```yaml
-NAMESPACE            NAME                                           READY   STATUS    RESTARTS        AGE
-consul               consul-client-t2zmv                            1/1     Running   0               6h49m
-consul               consul-connect-injector-5766bc9bf5-9klb9       1/1     Running   1 (6h49m ago)   6h49m
-consul               consul-connect-injector-5766bc9bf5-nkz9k       1/1     Running   0               6h49m
-consul               consul-controller-78fcb8747b-vkbl5             1/1     Running   0               6h49m
-consul               consul-ingress-demo-6fb95f55f9-phnnd           2/2     Running   0               6h49m
-consul               consul-server-0                                1/1     Running   0               6h49m
-consul               consul-webhook-cert-manager-69cdd8677c-dw58m   1/1     Running   0               6h49m
-consul               prometheus-server-688777b748-klmnb             2/2     Running   0               6h49m
-default              chuck-norris-app-6cb85cf545-5lb76              2/2     Running   0               6h45m
-default              chuck-norris-app-fix-6857764bc6-nnlrs          2/2     Running   0               6h45m
-default              grafana-588877cfcd-dschs                       1/1     Running   0               11h
-kube-system          coredns-6d4b75cb6d-62lz4                       1/1     Running   0               28h
-kube-system          coredns-6d4b75cb6d-dwr7g                       1/1     Running   0               28h
-kube-system          etcd-kind-control-plane                        1/1     Running   0               28h
-kube-system          kindnet-wqfhq                                  1/1     Running   0               28h
-kube-system          kube-apiserver-kind-control-plane              1/1     Running   0               28h
-kube-system          kube-controller-manager-kind-control-plane     1/1     Running   0               28h
-kube-system          kube-proxy-jz9v9                               1/1     Running   0               28h
-kube-system          kube-scheduler-kind-control-plane              1/1     Running   0               28h
-local-path-storage   local-path-provisioner-8687fd6488-qnj6d        1/1     Running   0               28h
-```
+NAMESPACE            NAME                                           READY   STATUS    RESTARTS   AGE
+consul               consul-client-qtnfh                            1/1     Running   0          17m
+consul               consul-connect-injector-5cbccb556f-sfr7b       1/1     Running   0          17m
+consul               consul-connect-injector-5cbccb556f-shmgj       1/1     Running   0          17m
+consul               consul-controller-6564fc54b-z42lh              1/1     Running   0          17m
+consul               consul-ingress-demo-6d5d6c8bfc-tnsg6           2/2     Running   0          17m
+consul               consul-server-0                                1/1     Running   0          17m
+consul               consul-webhook-cert-manager-59546c4b99-t8hsw   1/1     Running   0          17m
+consul               prometheus-server-86f7fbf8fd-fqshl             2/2     Running   0          17m
+default              chuck-norris-app-v1-5c48745d67-x6x5x           2/2     Running   0          27s
+default              chuck-norris-app-v2-78ccc86b66-264zc           2/2     Running   0          27s
+default              grafana-559dbc759c-m6rgb                       1/1     Running   0          13m
+kube-system          coredns-64897985d-f7kg8                        1/1     Running   0          19m
+kube-system          coredns-64897985d-zngwh                        1/1     Running   0          19m
+kube-system          etcd-kind-control-plane                        1/1     Running   0          19m
+kube-system          kindnet-tct5z                                  1/1     Running   0          19m
+kube-system          kube-apiserver-kind-control-plane              1/1     Running   0          19m
+kube-system          kube-controller-manager-kind-control-plane     1/1     Running   0          19m
+kube-system          kube-proxy-47hkt                               1/1     Running   0          19m
+kube-system          kube-scheduler-kind-control-plane              1/1     Running   0          19m
+local-path-storage   local-path-provisioner-5ddd94ff66-82wn7        1/1     Running   0          19m```
 
 You can see that each pod of our app has two containers. You can check what containers are running within the pod with command:
 
@@ -169,8 +168,12 @@ You can now visit `http://localhost:8500/` and see that we have one new service
 
 Now let’s verify Chuck Norris App was deployed properly. Expose the Chuck Norris App with `kubectl port-forward` and `chuck-norris-app` deployment name as the target.
 
-`kubectl port-forward deploy/chuck-norris-app 8080:8080`
+`kubectl port-forward deploy/chuck-norris-app-v1 8082:8080`
 
-Visit the application at `http://localhost:8500/` in a browser on your development machine.
+Now let's test the app from new tab:
 
-Chuck Norris app should pop up. This is however not solving what we are trying to achieve. Kubernetes itself is not able to loadbalance and gradually migrate to the new version of the application. For this we will need Consul Service Mesh which is able to manage the traffic and redirect it based on defined policies. Let’s move into it now.
+`curl http://localhost:8082`
+
+You should see HTML code of our running app.
+
+This is however not solving what we are trying to achieve. Kubernetes itself is not able to loadbalance and gradually migrate to the new version of the application. For this we will need Consul Service Mesh which is able to manage the traffic and redirect it based on defined policies. Let’s move into it now.

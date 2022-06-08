@@ -105,11 +105,11 @@ You can check in Consul dashboard if you go to `http://localhost:8500` under ser
 
 We have everything in place so we can now start steering the traffic to the new version. If you remember we have defined the split 90:10. 90% of the traffic will be redirected to version 1 and 10% of the traffic will be redirected to version 2. We will start with port forwarding of our ingress port so we will be able to access the application via `ingress-demo` ingress listening on the port 8080.
 
-`kubectl port-forward service/consul-ingress-demo 8080:8080 -n consul`
+`kubectl port-forward service/consul-ingress-demo 8083:8080 -n consul`
 
 ```yaml
 for ((i=0; i<=100000; i++)); do
-    curl -v --silent -H "Host: chuck-norris-app.ingress.dc1.consul:8080" "http://localhost:8080" 2>&1 | grep cite
+    curl -v --silent -H "Host: chuck-norris-app.ingress.dc1.consul:8080" "http://localhost:8083" 2>&1 | grep Version
 done
 ```
 

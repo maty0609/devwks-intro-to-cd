@@ -14,7 +14,10 @@ This workshop will show you how blue/green deployments can be done in the real w
 
 Clone Git repository
 
-`git clone https://github.com/maty0609/devwks-intro-to-cd.git`
+```
+cd /root
+git clone https://github.com/maty0609/devwks-intro-to-cd.git
+```
 
 ## Install Consul
 
@@ -132,6 +135,8 @@ You can check the progress with the command:
 `kubectl get pods --all-namespaces -w`
 
 ## Validate Consul and Grafana
+
+Befor we will validate Consul and Grafana make sure Caddy is running.
 
 Verify Consul was deployed properly by accessing the Consul UI. Expose the Consul UI with `kubectl port-forward` with the `consul-server-0` pod name as the target.
 
