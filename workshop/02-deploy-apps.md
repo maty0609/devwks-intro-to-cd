@@ -1,27 +1,24 @@
 ## Introduction
-
-In this part you will perform the following tasks:
-
+In this part we will be doing following tasks:
 - Deploy Chuck Norris app
 - Make Chuck Norris app part of Consul Service Mesh
 - Test the application
 
-## Deploy Apps
-
-In this chapter we will deploy Chuck Norris app. We will not only deploy the application but we will deploy it with Envoy sidecar.
+## Deploy Chuck Norris App Version 1 and Version 2
+In this chapter we will deploy Chuck Norris App version 1 and version 2. We will not only deploy the application but we will deploy it with Envoy sidecar which will make applications part of Consul Service Mesh.
 
 Envoy is a high-performance proxy to mediate all inbound and outbound traffic for all services in the service mesh. Envoy proxies are the only Consul components that interact with data plane traffic. This sidecar deployment allows Consul to enforce policy decisions and extract rich telemetry which can be sent to monitoring systems to provide information about the behaviour of the entire mesh.
 
-We will deploy two version of application - v1 and v2. The goal is to move our application from version 1 to version 2 which contains the fix. We will want to move our end users to the new version gradually in case we will see any anomalies so we can start rolling back without too much of the impact.
+We will deploy two version of application - v1 and v2. We will want to move our end users to the version 2 gradually in case we will see any anomalies so we can start rolling back to version 1 without too much of the impact.
 
 Let’s start with creating standard Kubernetes manifest which will contain few specific attributes:
-
 - Annotation `consul.hashicorp.com/connect-inject` ensure that Envoy sidecar will be deployed in this pod so the deployment will be part of Consul Service Mesh.
 - Annotation `consul.hashicorp.com/service-meta-version`defines service meta version which will be used to identify the version of our application. More on this later on.
 - Annotation `consul.hashicorp.com/service-tags` helps visually tag the service so in Consul UI we can see this as tag.
 - `ServiceAccount` defines what Consul service will be attached to this deployment. In this case only one `ServiceAccount` will be created however if for example the deployment will needs to be accessed from multiple different ports each port has to be represented by `ServiceAccount`
 
-```yaml
+Manifest to deploy Chuck Norris App version 1:
+```bash
 cat > chuck-norris-app-v1.yaml <<EOF
 apiVersion: v1
 kind: ServiceAccount
@@ -63,7 +60,8 @@ spec:
 EOF
 ```
 
-```yaml
+Manifest to deploy Chuck Norris App version 2:
+```bash
 cat > chuck-norris-app-v2.yaml <<EOF
 apiVersion: apps/v1
 kind: Deployment
@@ -101,8 +99,7 @@ EOF
 ```
 
 The last one we will create is the service object which will be shared between both deployments:
-
-```yaml
+```bash
 cat > chuck-norris-app-service.yaml <<EOF
 apiVersion: v1
 kind: Service
@@ -118,20 +115,19 @@ EOF
 ```
 
 Now we will apply all manifest which will start deploying both version of the application:
-
-```yaml
+```bash
 kubectl apply -f chuck-norris-app-v1.yaml
 kubectl apply -f chuck-norris-app-v2.yaml
 kubectl apply -f chuck-norris-app-service.yaml
 ```
 
 You can check the progress with the command:
+```bash
+kubectl get pods --all-namespaces
+```
 
-`kubectl get pods --all-namespaces`
-
-You should see something like this:
-
-```yaml
+You should this:
+```
 NAMESPACE            NAME                                           READY   STATUS    RESTARTS   AGE
 consul               consul-client-qtnfh                            1/1     Running   0          17m
 consul               consul-connect-injector-5cbccb556f-sfr7b       1/1     Running   0          17m
@@ -152,11 +148,13 @@ kube-system          kube-apiserver-kind-control-plane              1/1     Runn
 kube-system          kube-controller-manager-kind-control-plane     1/1     Running   0          19m
 kube-system          kube-proxy-47hkt                               1/1     Running   0          19m
 kube-system          kube-scheduler-kind-control-plane              1/1     Running   0          19m
-local-path-storage   local-path-provisioner-5ddd94ff66-82wn7        1/1     Running   0          19m```
+local-path-storage   local-path-provisioner-5ddd94ff66-82wn7        1/1     Running   0          19m
+```
 
-You can see that each pod of our app has two containers. You can check what containers are running within the pod with command:
-
-`kubectl describe pod <name of pod>`
+You can see that each pod of Chuck Norris App has two containers. You can check what containers are running within the pod with command:
+```bash
+kubectl describe pod <name of pod>
+```
 
 You can see that pod has two containers: `chuck-norris-app` which represents our application and `envoy-sidecar` which represents Consul and makes our application part of Consul service mesh.
 
@@ -165,14 +163,15 @@ You can now visit `http://localhost:8500/` and see that we have one new service
 ![Untitled](./images/consul-chuck-app.png)
 
 ## Test apps
-
-Now let’s verify Chuck Norris App was deployed properly. Expose the Chuck Norris App with `kubectl port-forward` and `chuck-norris-app` deployment name as the target.
-
-`kubectl port-forward deploy/chuck-norris-app-v1 8082:8080`
+Now let’s verify Chuck Norris App was deployed properly. Expose the Chuck Norris App with `kubectl port-forward` and `chuck-norris-app` deployment name as the target:
+```bash
+kubectl port-forward deploy/chuck-norris-app-v1 8082:8080
+```
 
 Now let's test the app from new tab:
-
-`curl http://localhost:8082`
+```bash
+curl http://localhost:8082
+```
 
 You should see HTML code of our running app.
 
