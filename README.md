@@ -1,6 +1,6 @@
 # DEVWKS-1930: Kubernetes and Introduction into Continuous Delivery
 
-This repository contains the files required for the participants of Cisco Live! US 2022 workshop DEVWKS-1930: Kubernetes and Introduction into Continuous Delivery. We will use Chuck Norris App (watch out!) to demonstrate how we can use Consul to do green/blue deployment.
+This repository contains the files required for the participants of Cisco Live! US 2022 workshop DEVWKS-1930: Kubernetes and Introduction into Continuous Delivery. We will use Chuck Norris App (watch out!) to demonstrate how we can use Consul to do Blue Green deployment.
 
 As the Modern application increases in complexity with deployment cycles getting shorter and shorter. Modern applications are often containerised and run on cloud or an on-prem Kubernetes cluster. Modern applications are becoming the main revenue stream for a lot of companies so mistakes and outages are not acceptable anymore.
 
@@ -12,7 +12,7 @@ Looking forward the session will look towards the next step of this setup, allow
 
 ### General Information
 - Kubernetes - https://kubernetes.io
-- Consul Hashi Learning - https://learn.hashicorp.com/consul
+- Consul HashiCorp Learning - https://learn.hashicorp.com/consul
 - Consul on Kubernetes GitHub - https://github.com/hashicorp/consul-k8s
 
 

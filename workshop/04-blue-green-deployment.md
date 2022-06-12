@@ -2,15 +2,13 @@
 In this part we will be doing following tasks:
 - Deploy Consul Service Resolver and Splitter
 - Configure Consul Ingress
-- Steer traffic from version 1 to version 2
+- Steer traffic from Chuck Norris Application version 1 to version 2
 
-## Blue/Green Deployments
-Blue green deployment is an application release model that gradually transfers user traffic from a previous version of an app or microservice to a nearly identical new release. To transfer the traffic between two different version we will need to split the traffic. Traffic splitting makes use of configuration entries to centrally configure services and Envoy proxies. There are three configuration entries you need to create to enable traffic splitting:
-- Service defaults for the API service to set the protocol to HTTP.
-- Service splitter which defines the traffic split between the service subsets.
-- Service resolver which defines which service instances are version 1 and 2.
+## Blue Green Deployment
+Blue green deployment is an application release model that gradually transfers user traffic from a previous version of an app or microservice to a nearly identical new release. To transfer the traffic between two different version we will need to split the traffic. Traffic splitting makes use of configuration entries to centrally configure services and Envoy proxies.
 
 ## Deploy Service Resolver and Splitter
+Leet's start with Service defaults for the API service to set the protocol to HTTP:
 ```bash
 cat > chuck-norris-app-service-default.yaml <<EOF
 apiVersion: consul.hashicorp.com/v1alpha1
@@ -22,6 +20,7 @@ spec:
 EOF
 ```
 
+Service resolver which defines which service instances are version 1 and 2:
 ```bash
 cat > chuck-norris-app-service-resolver.yaml <<EOF
 apiVersion: consul.hashicorp.com/v1alpha1
@@ -59,7 +58,7 @@ spec:
 EOF
 ```
 
-After manifests have been created apply all of them:
+After all manifests have been created let's apply them:
 ```bash
 kubectl apply -f chuck-norris-app-service-default.yaml
 kubectl apply -f chuck-norris-app-service-resolver.yaml
@@ -67,9 +66,9 @@ kubectl apply -f chuck-norris-app-service-splitter.yaml
 ```
 
 ## Configure Ingress
-The final piece we need to configure is the Ingress Gateway. Ingress exposes HTTP and HTTPS routes from outside the cluster to services within the cluster. Traffic routing is controlled by rules defined on the Ingress resource.
+The final piece we need to configure is the Ingress Gateway. Ingress exposes HTTP and HTTPS routes from outside the cluster to Kubernetes services within the cluster. Traffic routing is controlled by rules defined on the Ingress resource.
 
-In this case we want to tell Consul what service to route to when a client reaches the our service via the defined host header. In the spec below, we’ve told Consul’s Ingress Gateway to route any traffic to our `chuck-norris-app` via default URL `chuck-norris-app.ingress.dc1.consul:8080`. This URL is automatically created by Consul. First part contains the name of app, second part defines what object, third part stands for name of our datacenter and last part for the name and port.
+In this case we want to tell Consul what service to route to when a client reaches our service via the defined host header. In the spec below, we’ve told Consul’s Ingress Gateway to route any traffic to our `chuck-norris-app` via default URL `chuck-norris-app.ingress.dc1.consul:8080`. This URL is automatically created by Consul. First part contains the name of application, second part defines what object, third part stands for name of our datacenter and last part domain and port.
 
 ```bash
 cat > chuck-norris-app-ingress.yaml <<EOF
@@ -91,32 +90,32 @@ You can now apply Ingress manifest:
 kubectl apply -f chuck-norris-app-ingress.yaml
 ```
 
-You can check in Consul dashboard if you go to `http://localhost:8500` under services/ingress-demo and upstreams.
+You can check in Consul dashboard under Services and `ingress-demo` service and upstreams.
 
 ![Untitled](./images/consul-chuck-app.png)
 
 ## Moving traffic from version 1 to version 2
 We have everything in place so we can start steering the traffic from version 1 to version 2. If you remember we have defined the split 90:10. 90% of the traffic will be redirected to version 1 and 10% of the traffic will be redirected to version 2.
 
-We will start with port forwarding of our ingress port so we will be able to access the application via `ingress-demo` ingress listening on the port 8080:
+We will start with port forwarding of our Consul ingress so we will be able to access the application via `ingress-demo` listening on the port 8080:
 ```bash
 kubectl port-forward service/consul-ingress-demo 8083:8080 -n consul
 ```
 
-Let's generate HTTP requests to see what version is getting hit. We will start sending HTTP requests in the loop with `curl`:
+Let's generate HTTP requests to see what version is getting hit. Open the new terminal tab and let's start sending HTTP requests in the loop with `curl`:
 ```bash
 for ((i=0; i<=100000; i++)); do
     curl -v --silent -H "Host: chuck-norris-app.ingress.dc1.consul:8080" "http://localhost:8083" 2>&1 | grep Version
 done
 ```
 
-You can see that most of the time version 1 got hit and version 2 only feew times. It proves that everything is working in approximately 90:10 ratio.
+You can see that most of the time version 1 got hit and only few times version 2. It proves that everything is working in approximately 90:10 ratio.
 
 Go to your Grafana dashboard. You should see that most of the requests are hitting version 1 and only small portion version 2.
 
 ![Untitled](./images/grafana-app-v1.png)
 
-Now let’s steer more traffic to version 2. We will need to modify service splitter. Let’s modify it with `nano`:
+We are looking good so now let’s steer more traffic to version 2. We will need to modify service splitter. Let’s modify it with `nano`:
 ```bash
 nano chuck-norris-app-service-splitter.yaml
 ```
@@ -156,7 +155,7 @@ After few minutes you should see that most of requests are being redirected to v
 ![Untitled](./images/grafana-app-v2-part2.png)
 
 ## Wrapping It Up
-In this workshop you've learned the basics of Green/Blue Deployment. We have been able move the traffic from version 1 to version 2. You can see here:
+In this workshop you've learned the basics of Blue Green Deployment. We have been able move the traffic from version 1 to version 2. You can see here:
 ![Untitled](./images/grafana-app-v2-wrap.png)
 
 Hopefully you had fun, and find this enjoyable!
