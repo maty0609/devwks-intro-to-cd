@@ -5,7 +5,34 @@ In this part you will be doing following tasks:
 - Validate your Consul and Grafana
 
 ## Before we start
-Please clone workshop Git repository:
+Create Caddy configuration:
+```bash
+cat > Caddyfile <<EOF
+:8080 {
+
+    @8500 {
+        path /*
+    }
+
+    reverse_proxy @8500 127.0.0.1:8500
+
+
+}
+
+:8081 {
+
+    @3000 {
+        path /*
+    }
+
+    reverse_proxy @3000 127.0.0.1:3000
+
+
+}
+EOF
+```
+
+Clone workshop Git repository:
 ```bash
 cd /root
 git clone https://github.com/natilik/CLUS2022-DEVWKS-1930.git
@@ -135,7 +162,14 @@ kubectl get pods --all-namespaces -w
 ```
 
 ## Validate Consul and Grafana
-Before we will validate Consul and Grafana let's make sure Caddy is running. We will be accessing Consul and Grafana via proxy. You will be able to access both services via these two links:
+Before we will validate Consul and Grafana let's make sure Caddy is running.
+```
+cd /home/developer/src
+caddy stop
+caddy run
+```
+
+We will be accessing Consul and Grafana via proxy. You will be able to access both services via these two links:
 
 ![Untitled](./images/devnet-proxy.png)
 
