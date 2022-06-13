@@ -163,7 +163,7 @@ kubectl get pods --all-namespaces -w
 
 ## Validate Consul and Grafana
 Before we will validate Consul and Grafana let's make sure Caddy is running.
-```
+```bash
 cd /home/developer/src
 caddy stop
 caddy run

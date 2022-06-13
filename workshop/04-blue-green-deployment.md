@@ -115,10 +115,7 @@ Go to your Grafana dashboard. You should see that most of the requests are hitti
 
 ![Untitled](./images/grafana-app-v1.png)
 
-We are looking good so now let’s steer more traffic to version 2. We will need to modify service splitter. Let’s modify it with `nano`:
-```bash
-nano chuck-norris-app-service-splitter.yaml
-```
+We are looking good so now let’s steer more traffic to version 2. We will need to modify `chuck-norris-app-service-splitter.yaml`.
 
 Now let's change the value from 90 to 50 and 10 to 50 so requests will be split 50:50. Save it and apply it:
 ```bash
